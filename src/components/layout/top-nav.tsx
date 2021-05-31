@@ -114,7 +114,6 @@ export const TopNav: React.SFC<TopNavProps> = ({ handleNoteCreate }) => {
       <NoteForm
         isOpen={isOpen}
         onClose={onClose}
-        handleNoteCreate={handleNoteCreate}
       />
     </>
   );
