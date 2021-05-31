@@ -6,9 +6,9 @@ module.exports = withImages({
     return config;
   },
   env: {
-    mongodb_username: "next_blog",
-    mongodb_password: "lbxaIA8rnFhQukEJ",
-    mongodb_clustername: "cluster0.j2ej3.mongodb.net",
-    mongodb_database: "next-blog"
+    mongodb_username: "next_blog1",
+    mongodb_password: "lbxaIA8rnecaFhQsdfwukEJ",
+    mongodb_clustername: "cluster0",
+    mongodb_database: "next-blog1"
   }
 });
