@@ -12,18 +12,18 @@ import {
   FormLabel,
   FormErrorMessage,
   Input,
-  Textarea
+  Textarea,
+  useToast
 } from "@chakra-ui/react";
 import { nanoid } from "nanoid";
 import { SubmitHandler } from "react-hook-form";
 import { useForm } from "react-hook-form";
+import { useRouter } from "next/router";
 
 export interface NoteFormProps {
   isOpen: boolean;
   onClose: () => void;
   selectedNote?: note;
-  handleNoteCreate?: (note: note) => void;
-  handleNoteUpdate?: (note: note) => void;
 }
 
 type FormInputs = {
@@ -34,10 +34,11 @@ type FormInputs = {
 const NoteForm: React.SFC<NoteFormProps> = ({
   isOpen,
   onClose,
-  selectedNote,
-  handleNoteCreate,
-  handleNoteUpdate
+  selectedNote
 }) => {
+  const router = useRouter();
+  const toast = useToast();
+  const [loading, setLoading] = React.useState<boolean>(false);
   const { register, handleSubmit, formState, errors } = useForm<FormInputs>({
     mode: "onChange"
   });
@@ -48,14 +49,67 @@ const NoteForm: React.SFC<NoteFormProps> = ({
       title: data.title,
       body: data.body
     };
-    if (handleNoteCreate) {
-      newNote.id = nanoid();
-      if (handleNoteCreate) handleNoteCreate(newNote);
-    } else {
+    if (selectedNote) {
       newNote.id = selectedNote ? selectedNote.id : "";
-      if (handleNoteUpdate) handleNoteUpdate(newNote);
+      handleUpdate(newNote);
+    } else {
+      newNote.id = nanoid();
+      handleCreate(newNote);
     }
-    onClose();
+  };
+
+  async function handleUpdate(note: note) {
+    setLoading(true);
+    const response = await fetch("/api/update-note", {
+      method: "PUT",
+      body: JSON.stringify(note),
+      headers: {
+        "Content-Type": "application/json"
+      }
+    });
+
+    const data = await response.json();
+    if (!response.ok) {
+      setLoading(false);
+      throw new Error(data.message || "Something went wrong!");
+    } else {
+      setLoading(false);
+      showToast("Note updated.");
+      router.replace(router.asPath);
+      onClose();
+    }
+  }
+
+  async function handleCreate(note: note) {
+    setLoading(true);
+    const response = await fetch("/api/create-note", {
+      method: "POST",
+      body: JSON.stringify(note),
+      headers: {
+        "Content-Type": "application/json"
+      }
+    });
+
+    const data = await response.json();
+    if (!response.ok) {
+      setLoading(false);
+      throw new Error(data.message || "Something went wrong!");
+    } else {
+      setLoading(false);
+      showToast("Note created.");
+      router.push('/');
+      onClose();
+    }
+  }
+
+  const showToast = title => {
+    toast({
+      title: title,
+      status: "success",
+      position: "top",
+      duration: 2000,
+      isClosable: true
+    });
   };
 
   const validateTitle = (value: string) => {
@@ -114,11 +168,12 @@ const NoteForm: React.SFC<NoteFormProps> = ({
           <ModalFooter>
             <Button
               type="submit"
+              isLoading={loading}
               colorScheme="blue"
-              isLoading={formState.isSubmitting}
+              // isLoading={formState.isSubmitting}
               mr={3}
             >
-              Save
+              {selectedNote ? "Update" : "Save"}
             </Button>
             <Button onClick={onClose}>Cancel</Button>
           </ModalFooter>
