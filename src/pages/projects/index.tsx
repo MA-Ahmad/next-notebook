@@ -54,7 +54,7 @@ const IndexPage = props => {
   );
 };
 
-export function getStaticProps() {
+export async function getStaticProps() {
   const repositories_list = repositoriesList;
 
   return {
