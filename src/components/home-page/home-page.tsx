@@ -55,7 +55,6 @@ export const HomePage: React.SFC<HomePageProps> = ({ notes, setNotes }) => {
           <NoteForm
             isOpen={isOpen}
             onClose={onClose}
-            handleNoteUpdate={handleNoteUpdate}
             selectedNote={selectedNote}
           />
         ) : (
