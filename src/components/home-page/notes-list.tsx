@@ -13,6 +13,7 @@ import {
   HStack,
   useDisclosure
 } from "@chakra-ui/react";
+import { useRouter } from "next/router";
 import { DeleteIcon, EditIcon } from "@chakra-ui/icons";
 import { AnimateSharedLayout, motion } from "framer-motion";
 import NoteModal from "./note-modal";
@@ -29,6 +30,7 @@ const NotesList: React.SFC<NotesListProps> = ({
   handleClick,
   setNotes
 }) => {
+  const router = useRouter();
   const bg = useColorModeValue("white", "#2f3244");
   const [selectedNote, setSelectedNote] = React.useState<note>();
   const toast = useToast();
@@ -41,8 +43,23 @@ const NotesList: React.SFC<NotesListProps> = ({
     const newNotes: note[] = notes.filter((note: note) => note.id !== id);
     setNotes(newNotes);
     showToast();
+    handleDelete(id)
     e.stopPropagation();
   };
+
+  async function handleDelete(id: string) {
+    const response = await fetch(`/api/notes/${id}`, {
+      method: "DELETE"
+    });
+
+    const data = await response.json();
+    if (!response.ok) {
+      throw new Error(data.message || "Something went wrong!");
+    } else {
+      // showToast();
+      router.replace(router.asPath);
+    }
+  }
 
   const onClick = (id: string, e: React.MouseEvent<SVGElement, MouseEvent>) => {
     handleClick(id);
